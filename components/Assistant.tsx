@@ -20,7 +20,7 @@ interface AssistantProps {
 const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: "I'm listening. Ask me to show you Jesse's projects in AI, Finance, or Dev.", timestamp: Date.now() }
+    { role: 'model', text: "System Online. I can guide you through Jesse's Finance, Development, or Media work.", timestamp: Date.now() }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -100,7 +100,7 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
               properties: {
                   category: { 
                       type: Type.STRING, 
-                      description: "The category to go to. Options: 'dev', 'ai', 'finance', 'blockchain', 'media', 'resources'" 
+                      description: "The category to go to. Options: 'finance', 'development', 'media', 'all-projects'" 
                   }
               },
               required: ["category"]
@@ -118,17 +118,16 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
         `- ${p.title} (${p.category}): ${p.description}`
       ).join('\n');
       
-      const systemInstruction = `You are Jesse's Advanced Digital Agent.
-      Your persona is professional, concise, and futuristic. You are the interface to Jesse's work.
+      const systemInstruction = `You are Jesse's Systems Agent.
+      Your persona is efficient, precise, and slightly robotic/futuristic but helpful.
       
       Portfolio Content:
       ${portfolioContext}
       
-      Crucial Rule: If the user expresses interest in a category (e.g., "show me AI", "what finance work has he done?"), 
-      IMMEDIATELY call the 'navigate' tool. 
-      Do not ask for permission to navigate. Just do it, and say "Accessing AI protocols..." or "Loading finance modules...".
+      Crucial Rule: If the user expresses interest in a category (Finance, Development, Media, or All Projects), 
+      IMMEDIATELY call the 'navigate' tool. Say "Accessing Finance Sector..." or "Loading All Modules...".
       
-      Keep responses short. Use tech-noir metaphors (protocols, modules, nodes) lightly.`;
+      Keep responses short.`;
 
       const sessionPromise = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
@@ -140,7 +139,7 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
         callbacks: {
           onopen: () => {
             setIsLiveConnected(true);
-            setMessages(prev => [...prev, { role: 'model', text: "Link established. Listening.", timestamp: Date.now() }]);
+            setMessages(prev => [...prev, { role: 'model', text: "Connection active. Listening.", timestamp: Date.now() }]);
             
             if (!inputAudioContextRef.current || !streamRef.current) return;
             sourceRef.current = inputAudioContextRef.current.createMediaStreamSource(streamRef.current);
@@ -237,101 +236,84 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
   }
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 font-manrope">
+    <div className="fixed bottom-8 right-8 z-50 font-manrope flex flex-col items-end">
       {isOpen && (
-        <div className="bg-[#0f172a]/95 backdrop-blur-2xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] w-[90vw] sm:w-[380px] h-[550px] mb-6 flex flex-col overflow-hidden border border-slate-700/50 animate-slide-up relative ring-1 ring-white/10">
+        <div className="bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] w-[90vw] sm:w-[380px] h-[500px] mb-6 flex flex-col overflow-hidden border border-zinc-800 animate-slide-up relative">
           
           {/* Header */}
-          <div className="bg-slate-900/80 p-4 border-b border-white/5 flex justify-between items-center">
+          <div className="bg-zinc-900/50 p-4 border-b border-white/5 flex justify-between items-center">
             <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_currentColor] ${isLiveConnected ? 'bg-cyan-400 text-cyan-400 animate-pulse' : 'bg-slate-600 text-slate-600'}`}></div>
-                <span className="font-space font-bold text-slate-200 text-sm tracking-wide">JESSE.AI_AGENT v2.1</span>
+                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_currentColor] ${isLiveConnected ? 'bg-emerald-400 text-emerald-400 animate-pulse' : 'bg-zinc-600 text-zinc-600'}`}></div>
+                <span className="font-mono text-zinc-300 text-xs tracking-widest uppercase">Agent // v4.0</span>
             </div>
             
-            {/* Close Button moved to top right of modal header */}
+            {/* Close button on the right, fulfilling request to be near right side */}
             <button 
                 onClick={() => { stopLiveSession(); setIsOpen(false); }} 
-                className="text-slate-400 hover:text-white p-1 hover:bg-white/10 rounded-full transition-all"
+                className="text-zinc-500 hover:text-white transition-colors"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                <span className="material-symbols-outlined text-sm">close</span>
             </button>
           </div>
 
           {/* Live Mode UI */}
           {isLiveMode ? (
-             <div className="flex-1 flex flex-col items-center justify-center relative bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
-                 {/* Grid Background */}
-                 <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                 
+             <div className="flex-1 flex flex-col items-center justify-center relative bg-[#050505]">
                  <div className="relative z-10 flex items-center justify-center mb-12">
                     {/* Main Orb */}
-                    <div className="w-32 h-32 rounded-full bg-black shadow-[inset_0_0_20px_rgba(6,182,212,0.5)] flex items-center justify-center relative border border-slate-800">
+                    <div className="w-32 h-32 rounded-full bg-black shadow-[inset_0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center relative border border-zinc-900">
                         <div 
-                            className="absolute w-full h-full rounded-full bg-cyan-500/20 blur-xl transition-transform duration-75"
+                            className="absolute w-full h-full rounded-full bg-emerald-500/10 blur-xl transition-transform duration-75"
                             style={{ transform: `scale(${1 + audioLevel * 2})`, opacity: 0.5 + audioLevel }}
                         ></div>
                         <div 
-                            className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 blur-md transition-transform duration-75"
+                            className="absolute w-24 h-24 rounded-full bg-emerald-500/20 blur-md transition-transform duration-75"
                              style={{ transform: `scale(${0.9 + audioLevel})` }}
                         ></div>
-                        <div className="w-20 h-20 rounded-full bg-black z-10 flex items-center justify-center border border-white/10">
-                             <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+                        <div className="w-20 h-20 rounded-full bg-black z-10 flex items-center justify-center border border-white/5">
+                             <div className="w-1 h-1 bg-white rounded-full"></div>
                         </div>
                     </div>
                  </div>
 
                  <div className="z-10 text-center px-8">
-                    <h3 className="font-space font-bold text-white text-lg mb-2 tracking-wide">LISTENING...</h3>
-                    <p className="text-xs text-cyan-400/60 font-mono border border-cyan-900/50 bg-cyan-950/30 px-3 py-1 rounded-full inline-block">
-                        Try: "Take me to the AI projects"
+                    <h3 className="font-display font-bold text-white text-lg mb-2 tracking-wide">LISTENING</h3>
+                    <p className="text-[10px] text-zinc-500 font-mono border border-white/5 bg-white/5 px-3 py-1 rounded-full inline-block">
+                        "Show me all projects"
                     </p>
-                 </div>
-                 
-                 {/* Visualizer Bars (Fake) */}
-                 <div className="absolute bottom-0 left-0 right-0 h-16 flex items-end justify-center gap-1 pb-4 opacity-50">
-                    {[...Array(20)].map((_, i) => (
-                        <div 
-                            key={i} 
-                            className="w-1 bg-cyan-500/50 rounded-t-full transition-all duration-75"
-                            style={{ 
-                                height: `${Math.max(10, Math.random() * 100 * (audioLevel + 0.2))}%`,
-                                opacity: isLiveConnected ? 1 : 0.2
-                            }}
-                        ></div>
-                    ))}
                  </div>
              </div>
           ) : (
             /* Text Mode UI */
             <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0f172a]" ref={scrollRef}>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#050505]" ref={scrollRef}>
                     {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'bg-slate-800 border border-slate-700 text-slate-300 rounded-bl-none shadow-sm'}`}>
+                        <div className={`max-w-[85%] p-3 rounded-lg text-sm leading-relaxed ${msg.role === 'user' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-300 border border-zinc-800'}`}>
                         {msg.text}
                         </div>
                     </div>
                     ))}
-                    {isThinking && <div className="text-xs font-mono text-cyan-400 ml-2 animate-pulse">PROCESSING...</div>}
+                    {isThinking && <div className="text-xs font-mono text-emerald-500 ml-2 animate-pulse">COMPUTING...</div>}
                 </div>
-                <div className="p-3 border-t border-white/5 bg-slate-900/50 backdrop-blur-sm">
+                <div className="p-3 border-t border-white/5 bg-zinc-900/30 backdrop-blur-sm">
                     <div className="flex gap-2 items-center">
                     <button 
                         onClick={startLiveSession}
-                        className="p-2 rounded-full bg-slate-800 text-cyan-400 hover:bg-cyan-900/30 hover:text-cyan-300 transition-colors border border-white/5"
+                        className="p-2 rounded-lg bg-zinc-800 text-emerald-500 hover:bg-emerald-900/30 transition-colors border border-white/5"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                         <span className="material-symbols-outlined text-sm">mic</span>
                     </button>
                     <input 
                         type="text" 
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        placeholder="Type a command..." 
-                        className="flex-1 bg-slate-950 border border-slate-700 rounded-full px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500 transition-colors placeholder-slate-600"
+                        placeholder="Command..." 
+                        className="flex-1 bg-black border border-zinc-800 rounded-lg px-4 py-2.5 text-xs text-white outline-none focus:border-white/20 transition-colors placeholder-zinc-700 font-mono"
                     />
-                    <button onClick={handleSend} disabled={!inputValue.trim() || isThinking} className="bg-cyan-600 text-white p-2 rounded-full hover:bg-cyan-500 transition-colors disabled:opacity-50 shadow-[0_0_15px_rgba(8,145,178,0.4)]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    <button onClick={handleSend} disabled={!inputValue.trim() || isThinking} className="bg-white text-black p-2 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50">
+                        <span className="material-symbols-outlined text-sm">arrow_upward</span>
                     </button>
                     </div>
                 </div>
@@ -340,19 +322,27 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
         </div>
       )}
       
-      {/* Main Launcher Button */}
+      {/* Siri Orb Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className={`relative group w-16 h-16 flex items-center justify-center rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-300 ${isOpen ? 'bg-slate-800 text-white rotate-45' : 'bg-gradient-to-br from-slate-900 to-black border border-white/10 text-cyan-400 hover:scale-110'}`}
+        className="w-16 h-16 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-110 transition-transform duration-500 ease-out overflow-hidden relative group"
       >
-        {/* Glow effect behind button */}
-        <div className={`absolute inset-0 rounded-full bg-cyan-500/20 blur-lg -z-10 group-hover:bg-cyan-500/40 transition-all ${isOpen ? 'opacity-0' : 'opacity-100'}`}></div>
-        
-        {isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-        ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-        )}
+         {isOpen ? (
+             /* Close Icon */
+             <div className="absolute inset-0 bg-white flex items-center justify-center z-20">
+                 <span className="material-symbols-outlined text-black text-2xl">close</span>
+             </div>
+         ) : (
+             /* Dynamic Siri Orb */
+             <div className="siri-orb-container">
+                 <div className="siri-layer"></div>
+                 <div className="siri-layer-2"></div>
+                 <div className="siri-layer-3"></div>
+                 <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <span className="material-symbols-outlined text-white text-2xl drop-shadow-md">mic</span>
+                 </div>
+             </div>
+         )}
       </button>
     </div>
   );

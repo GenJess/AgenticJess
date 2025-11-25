@@ -1,131 +1,119 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
 
 import React from 'react';
-import { CategoryId, Project } from '../types';
+import { CategoryId } from '../types';
 import { CATEGORIES, PORTFOLIO_ITEMS } from '../constants';
 
 interface SectionDetailProps {
   categoryId: CategoryId;
+  onToggleVault: () => void;
 }
 
-const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId }) => {
+const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId, onToggleVault }) => {
   const category = CATEGORIES.find(c => c.id === categoryId);
   const projects = PORTFOLIO_ITEMS.filter(p => p.category === categoryId);
 
   if (!category) return null;
 
-  const isMedia = categoryId === 'media';
-
   return (
-    <section className="mx-auto max-w-7xl px-6 pb-20 pt-32 min-h-screen animate-fade-in">
-       {/* Header */}
-       <div className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-             <div className={`w-1 h-8 bg-${category.color}-500 rounded-full shadow-[0_0_15px_currentColor]`}></div>
-             <span className={`text-sm font-bold font-space tracking-[0.2em] uppercase text-${category.color}-400`}>{category.label}</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-manrope font-bold text-white mb-6 max-w-2xl leading-tight">{category.description}</h1>
-       </div>
+    <section className="max-w-7xl mx-auto px-6 py-12 pt-32 min-h-screen animate-fade-in">
+        <header className="mb-16 border-b border-white/5 pb-8">
+            <span className={`text-xs font-mono mb-2 block text-${category.color}-500`}>{category.number} / SECTOR</span>
+            <h2 className="text-4xl md:text-5xl font-display font-semibold text-white tracking-tight">{category.label} Systems</h2>
+            <p className="text-zinc-500 mt-4 max-w-xl">{category.description}</p>
+        </header>
 
-       {/* Grid */}
-       <div className={`grid ${isMedia ? 'grid-cols-1 gap-12' : 'md:grid-cols-2 gap-8'}`}>
-          {projects.map((project, idx) => {
-             // RENDER MEDIA PLAYERS
-             if (project.mediaType === 'audio') {
-                 return (
-                    <div key={project.id} className="bg-[#0f172a] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-8 hover:border-white/10 transition-colors shadow-xl">
-                        <div className="w-full md:w-48 h-48 bg-slate-900 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 relative group">
-                            <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-black">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                </div>
-                            </div>
+        {/* --- FINANCE LAYOUT (Wide Cards) --- */}
+        {categoryId === 'finance' && (
+            <div className="grid grid-cols-1 gap-12">
+                {projects.map(project => (
+                    <div key={project.id} className="glass-card rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 group hover:border-white/10 transition-colors">
+                        <div className="h-64 lg:h-auto relative bg-zinc-900">
+                             <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
                         </div>
-                        <div className="flex-1 flex flex-col justify-center">
-                            <div className="flex items-center gap-3 mb-2">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 bg-cyan-950/30 border border-cyan-900/50 px-2 py-1 rounded">Audio</span>
-                                <span className="text-xs text-slate-500">{project.duration}</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-1">{project.title}</h3>
-                            <p className="text-slate-400 mb-6">{project.author || 'Unknown Artist'}</p>
-                            
-                            {/* Fake Player Controls */}
-                            <div className="w-full bg-slate-800/50 h-1.5 rounded-full mb-4 overflow-hidden">
-                                <div className="w-1/3 h-full bg-cyan-500 rounded-full"></div>
-                            </div>
-                            <div className="flex gap-6 text-slate-400">
-                                <svg className="w-5 h-5 hover:text-white cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg>
-                                <svg className="w-5 h-5 text-white fill-current cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                <svg className="w-5 h-5 hover:text-white cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>
+                        <div className="p-8 lg:p-12 flex flex-col justify-center">
+                            <h3 className="text-2xl font-display font-bold text-white mb-4">{project.title}</h3>
+                            <p className="text-zinc-400 leading-relaxed mb-6">{project.description}</p>
+                            <div className="flex flex-wrap gap-2">
+                                {project.tags.map(tag => (
+                                    <span key={tag} className="px-2 py-1 bg-white/5 border border-white/5 rounded text-xs text-zinc-400">{tag}</span>
+                                ))}
                             </div>
                         </div>
                     </div>
-                 );
-             }
+                ))}
+            </div>
+        )}
 
-             if (project.mediaType === 'video') {
-                 return (
-                    <div key={project.id} className="bg-[#0f172a] border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 transition-colors shadow-xl">
-                        <div className="w-full aspect-video bg-black relative group cursor-pointer">
-                             <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-                             <div className="absolute inset-0 flex items-center justify-center">
-                                 <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                 </div>
-                             </div>
-                             <div className="absolute bottom-4 right-4 bg-black/80 px-2 py-1 rounded text-xs font-mono text-white">
-                                 {project.duration}
-                             </div>
+        {/* --- DEV LAYOUT (Bento) --- */}
+        {categoryId === 'development' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-[450px]">
+                {/* Featured Item (Large) */}
+                {projects[0] && (
+                    <div className="lg:col-span-2 glass-card p-8 rounded-2xl relative overflow-hidden flex flex-col justify-end group">
+                         <div className="absolute inset-0 z-0">
+                            <img src={projects[0].imageUrl} className="w-full h-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
                         </div>
-                        <div className="p-6">
-                            <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-                            <p className="text-slate-400 text-sm">{project.description}</p>
+                        <div className="relative z-10">
+                            <h3 className="text-3xl font-display font-bold text-white mb-3">{projects[0].title}</h3>
+                            <p className="text-zinc-300 max-w-lg mb-6 leading-relaxed">{projects[0].description}</p>
+                            <div className="flex gap-2">
+                                {projects[0].tags.map(tag => (
+                                    <span key={tag} className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">{tag}</span>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                 );
-             }
+                )}
+                
+                {/* Secondary Item (Vertical) */}
+                {projects[1] && (
+                     <div className="glass-card p-8 rounded-2xl relative overflow-hidden flex flex-col justify-end group">
+                        <div className="absolute inset-0 z-0">
+                            <img src={projects[1].imageUrl} className="w-full h-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-2xl font-display font-bold text-white mb-3">{projects[1].title}</h3>
+                            <p className="text-zinc-400 text-sm mb-4">{projects[1].description}</p>
+                        </div>
+                     </div>
+                )}
+            </div>
+        )}
 
-             // DEFAULT CARD LAYOUT (Dev, AI, Finance)
-             return (
+        {/* --- MEDIA LAYOUT (Grid + Vault) --- */}
+        {categoryId === 'media' && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {projects.map(project => (
+                    <div key={project.id} className="aspect-square bg-zinc-900 rounded-xl overflow-hidden hover:opacity-80 transition-opacity group relative">
+                        <img src={project.imageUrl} className="w-full h-full object-cover" />
+                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center">
+                            <span className="text-white text-sm font-bold">{project.title}</span>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Vault Teaser */}
                 <div 
-                    key={project.id}
-                    className="group relative bg-[#0f172a] border border-white/5 rounded-[2rem] overflow-hidden hover:border-white/10 transition-all duration-500 animate-slide-up"
-                    style={{ animationDelay: `${0.1 * idx}s` }}
+                    onClick={onToggleVault}
+                    className="aspect-square bg-black border border-zinc-800 rounded-xl overflow-hidden cursor-pointer group relative"
                 >
-                    <div className="h-64 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent z-10 opacity-80"></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                        <span className="material-symbols-outlined text-4xl text-zinc-600 mb-2 group-hover:text-emerald-400 transition-colors">lock</span>
+                        <span className="text-[10px] uppercase tracking-widest text-zinc-500">Restricted Model</span>
+                    </div>
                     <img 
-                        src={project.imageUrl} 
-                        alt={project.title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100 grayscale group-hover:grayscale-0"
+                        src="https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&q=80" 
+                        className="w-full h-full object-cover opacity-20 group-hover:opacity-10 transition-opacity"
                     />
-                    </div>
-                    
-                    <div className="p-8 relative z-20 -mt-12">
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        {project.tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-slate-900 border border-slate-700 rounded-full text-[10px] font-bold text-slate-300 font-space uppercase tracking-wide">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                    <h3 className="text-2xl font-bold font-manrope text-white mb-3 group-hover:text-cyan-400 transition-colors">{project.title}</h3>
-                    <p className="text-slate-400 font-manrope leading-relaxed mb-8 font-light">{project.description}</p>
-                    
-                    <button className="flex items-center gap-2 text-sm font-bold font-space text-white bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-all border border-white/5">
-                        View Details
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                    </button>
-                    </div>
                 </div>
-             );
-          })}
-       </div>
+            </div>
+        )}
     </section>
   );
 };

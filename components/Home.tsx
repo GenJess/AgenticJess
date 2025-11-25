@@ -1,62 +1,68 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
 
 import React from 'react';
+import { CategoryId } from '../types';
 
 interface HomeProps {
+  onNavigate: (target: CategoryId | 'all-projects') => void;
   onStartVoice: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onStartVoice }) => {
+const Home: React.FC<HomeProps> = ({ onNavigate, onStartVoice }) => {
   return (
-    <section className="h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
-        
-        {/* Background Ambient */}
-        <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-900/10 rounded-full blur-[120px]"></div>
+    <section className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center px-6 overflow-hidden pt-20">
+        {/* Background */}
+        <div className="absolute inset-0 z-0">
+            <img 
+                src="https://images.unsplash.com/photo-1480694313141-fce5e697ee25?auto=format&fit=crop&q=80" 
+                className="w-full h-full object-cover opacity-20"
+                alt="Abstract Background"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/50 to-transparent"></div>
         </div>
 
-        <div className="flex flex-col items-center text-center z-10 animate-slide-up">
-            
-            {/* Voice Command Core */}
-            <div className="relative group cursor-pointer mb-12" onClick={onStartVoice}>
-                {/* Outer Rings - Animated */}
-                <div className="absolute inset-0 rounded-full border border-cyan-500/10 scale-[1.8] animate-[spin_10s_linear_infinite] opacity-30"></div>
-                <div className="absolute inset-0 rounded-full border border-dashed border-cyan-500/10 scale-[2.2] animate-[spin_15s_linear_infinite_reverse] opacity-20"></div>
+        <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 items-center animate-fade-in">
+            <div>
+                {/* Voice Agent Trigger */}
+                <button 
+                    onClick={onStartVoice}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 hover:bg-white/10 transition-colors group cursor-pointer"
+                >
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[10px] font-medium text-zinc-300 tracking-[0.2em] uppercase group-hover:text-emerald-400 transition-colors">System Online // Talk</span>
+                </button>
+
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-semibold text-white leading-[0.9] tracking-tighter mb-8">
+                    The Architecture<br/>
+                    <span className="text-zinc-600">of Intelligence.</span>
+                </h1>
                 
-                {/* Hover Rings */}
-                <div className="absolute inset-0 rounded-full border border-slate-700/50 scale-[1.4] group-hover:scale-[1.6] transition-transform duration-700"></div>
-                
-                {/* The Core */}
-                <div className="w-40 h-40 rounded-full bg-[#020617] shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_50px_rgba(6,182,212,0.1)] flex items-center justify-center relative z-10 border border-white/5 group-hover:border-cyan-500/50 transition-colors duration-500">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center relative overflow-hidden shadow-inner">
-                        {/* Active Glow */}
-                        <div className="absolute inset-0 bg-cyan-500/20 blur-xl animate-[pulse_3s_ease-in-out_infinite]"></div>
-                        
-                        {/* Mic Icon */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400 relative z-10 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                    </div>
-                </div>
-                
-                {/* Label */}
-                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-max">
-                    <p className="text-[10px] font-space font-bold tracking-[0.3em] text-cyan-500/60 border border-cyan-500/10 px-3 py-1 rounded-full bg-cyan-950/10 uppercase">
-                        Tap to Initialise
-                    </p>
+                <p className="text-lg text-zinc-400 max-w-lg leading-relaxed font-light mb-12 border-l border-zinc-800 pl-6">
+                    A portfolio of algorithmic finance, generative identity, and autonomous agents. 
+                    Building systems that think, trade, and create.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4">
+                    <button 
+                        onClick={() => onNavigate('all-projects')}
+                        className="px-8 py-4 bg-white text-black rounded-lg font-semibold tracking-tight hover:bg-zinc-200 transition-all"
+                    >
+                        Enter Portfolio
+                    </button>
+                    <button 
+                        onClick={() => onNavigate('code')}
+                        className="px-8 py-4 border border-white/10 text-white rounded-lg font-medium hover:bg-white/5 transition-colors flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-sm">code</span> Export Code
+                    </button>
                 </div>
             </div>
-
-            <h1 className="text-5xl md:text-7xl font-medium font-manrope text-white tracking-tighter mb-4 leading-tight opacity-90">
-                Jesse's <span className="text-transparent bg-clip-text bg-gradient-to-br from-slate-200 to-slate-500">Hub</span>
-            </h1>
-            
-            <p className="text-slate-500 text-sm md:text-base font-mono tracking-wide">
-                // SYSTEM ONLINE. WAITING FOR VOICE INPUT.
-            </p>
-
         </div>
     </section>
   );
