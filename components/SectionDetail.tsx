@@ -4,19 +4,26 @@
 */
 
 import React from 'react';
-import { CategoryId } from '../types';
+import { CategoryId, Project } from '../types';
 import { CATEGORIES, PORTFOLIO_ITEMS } from '../constants';
 
 interface SectionDetailProps {
   categoryId: CategoryId;
   onToggleVault: () => void;
+  onOpenManifesto: () => void; // New Prop
 }
 
-const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId, onToggleVault }) => {
+const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId, onToggleVault, onOpenManifesto }) => {
   const category = CATEGORIES.find(c => c.id === categoryId);
   const projects = PORTFOLIO_ITEMS.filter(p => p.category === categoryId);
 
   if (!category) return null;
+
+  const handleProjectClick = (project: Project) => {
+      if (project.hasDetailView) {
+          onOpenManifesto();
+      }
+  };
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-12 pt-32 min-h-screen animate-fade-in">
@@ -53,13 +60,23 @@ const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId, onToggleVault
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-[450px]">
                 {/* Featured Item (Large) */}
                 {projects[0] && (
-                    <div className="lg:col-span-2 glass-card p-8 rounded-2xl relative overflow-hidden flex flex-col justify-end group">
+                    <div 
+                        onClick={() => handleProjectClick(projects[0])}
+                        className={`lg:col-span-2 glass-card p-8 rounded-2xl relative overflow-hidden flex flex-col justify-end group ${projects[0].hasDetailView ? 'cursor-pointer hover:border-emerald-500/50' : ''}`}
+                    >
                          <div className="absolute inset-0 z-0">
                             <img src={projects[0].imageUrl} className="w-full h-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
                         </div>
                         <div className="relative z-10">
-                            <h3 className="text-3xl font-display font-bold text-white mb-3">{projects[0].title}</h3>
+                            <div className="flex justify-between items-start">
+                                <h3 className="text-3xl font-display font-bold text-white mb-3">{projects[0].title}</h3>
+                                {projects[0].hasDetailView && (
+                                    <span className="bg-emerald-500 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">
+                                        Read Strategy
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-zinc-300 max-w-lg mb-6 leading-relaxed">{projects[0].description}</p>
                             <div className="flex gap-2">
                                 {projects[0].tags.map(tag => (
@@ -80,6 +97,19 @@ const SectionDetail: React.FC<SectionDetailProps> = ({ categoryId, onToggleVault
                         <div className="relative z-10">
                             <h3 className="text-2xl font-display font-bold text-white mb-3">{projects[1].title}</h3>
                             <p className="text-zinc-400 text-sm mb-4">{projects[1].description}</p>
+                        </div>
+                     </div>
+                )}
+                
+                {/* Tertiary Item (Rest of grid if needed) */}
+                 {projects[2] && (
+                     <div className="lg:col-span-3 glass-card p-8 rounded-2xl relative overflow-hidden flex flex-row items-center gap-8 group">
+                        <div className="w-1/3 h-full relative overflow-hidden rounded-xl">
+                             <img src={projects[2].imageUrl} className="absolute inset-0 w-full h-full object-cover opacity-60" />
+                        </div>
+                        <div className="relative z-10 flex-1">
+                            <h3 className="text-2xl font-display font-bold text-white mb-3">{projects[2].title}</h3>
+                            <p className="text-zinc-400 text-sm mb-4">{projects[2].description}</p>
                         </div>
                      </div>
                 )}

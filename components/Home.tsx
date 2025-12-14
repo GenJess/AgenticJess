@@ -56,10 +56,10 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onStartVoice }) => {
                         Enter Portfolio
                     </button>
                     <button 
-                        onClick={() => onNavigate('code')}
+                        onClick={() => onNavigate('library')}
                         className="px-8 py-4 border border-white/10 text-white rounded-lg font-medium hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-sm">code</span> Export Code
+                        <span className="material-symbols-outlined text-sm">grid_view</span> Access Nexus
                     </button>
                 </div>
             </div>

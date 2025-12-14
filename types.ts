@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-export type CategoryId = 'finance' | 'development' | 'media' | 'vault' | 'code' | 'all-projects';
+export type CategoryId = 'finance' | 'development' | 'media' | 'vault' | 'library' | 'all-projects';
 
 export interface Project {
   id: string;
@@ -18,6 +18,18 @@ export interface Project {
   audioUrl?: string; // URL to hosted audio file
   duration?: string;
   author?: string;
+  hasDetailView?: boolean; // If true, clicking opens a custom view instead of just expanding
+}
+
+export interface LibraryItem {
+    id: string;
+    type: 'tool' | 'resource' | 'instruction';
+    title: string;
+    description: string;
+    content?: string; // For text/markdown
+    component?: string; // identifier for dynamic rendering
+    tags: string[];
+    date: string;
 }
 
 export interface ChatMessage {
@@ -31,7 +43,8 @@ export type ViewState =
   | { type: 'section', categoryId: CategoryId }
   | { type: 'all-projects' }
   | { type: 'vault' }
-  | { type: 'code' };
+  | { type: 'library' }
+  | { type: 'manifesto' };
 
 export interface CategoryDef {
     id: CategoryId;

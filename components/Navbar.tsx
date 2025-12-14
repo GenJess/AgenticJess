@@ -53,8 +53,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, onToggleVault, activeCatego
                         <span className="material-symbols-outlined text-[16px]">lock</span> Vault
                     </button>
                     
-                    <button onClick={() => handleNav('code')} className="text-xs font-medium uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-2 border-l border-white/10 pl-6">
-                        <span className="material-symbols-outlined text-[16px]">code</span> Source
+                    <button onClick={() => handleNav('library')} className="text-xs font-medium uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-2 border-l border-white/10 pl-6">
+                        <span className="material-symbols-outlined text-[16px]">grid_view</span> Nexus
                     </button>
                 </div>
 
@@ -75,7 +75,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, onToggleVault, activeCatego
             <button onClick={() => handleNav('development')} className="text-3xl font-display font-light text-white">Development</button>
             <button onClick={() => handleNav('media')} className="text-3xl font-display font-light text-white">Media</button>
             <button onClick={() => { setIsMobileOpen(false); onToggleVault(); }} className="text-3xl font-display font-light text-emerald-500">Vault Access</button>
-            <button onClick={() => handleNav('code')} className="text-xl font-mono text-zinc-500 mt-8">&lt;view code /&gt;</button>
+            <button onClick={() => handleNav('library')} className="text-xl font-mono text-zinc-500 mt-8">NEXUS // LIBRARY</button>
         </div>
     </>
   );

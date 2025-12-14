@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import { Project, CategoryId, CategoryDef, Product, JournalArticle } from './types';
+import { Project, CategoryId, CategoryDef, Product, JournalArticle, LibraryItem } from './types';
 
 export const BRAND_NAME = "JESSE";
 
@@ -32,6 +32,36 @@ export const CATEGORIES: CategoryDef[] = [
 ];
 
 export const PORTFOLIO_ITEMS: Project[] = [
+  // DEVELOPMENT - Featured Item first
+  {
+    id: 'd0', // High priority ID
+    title: 'The No-Code CTO Strategy',
+    description: 'Strategic analysis on "MVP Hacking" and the Agentic Economy. Why building a MicroGate is better than building a SaaS.',
+    category: 'development',
+    imageUrl: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80',
+    tags: ['Strategy', 'Architecture', 'Manifesto'],
+    mediaType: 'image',
+    hasDetailView: true // This triggers the Manifesto component
+  },
+  {
+    id: 'd1',
+    title: 'AI Identity Architect',
+    description: 'An intelligent dating companion that optimizes user portfolios and social fronts. Features a "Neural Orchestration" layer that vectorizes personal files to interact with autonomous agents while preserving privacy.',
+    category: 'development',
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80',
+    tags: ['Vector DB', 'React', 'LLM'],
+    mediaType: 'image'
+  },
+  {
+    id: 'd2',
+    title: 'Probability Engine',
+    description: 'Machine Learning model analyzing "Perpetual Path" raffles. Identifies statistical anomalies in ticket burn rates to predict optimal win windows.',
+    category: 'development',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
+    tags: ['ML', 'Statistics'],
+    mediaType: 'image'
+  },
+
   // FINANCE
   {
     id: 'f1',
@@ -49,26 +79,6 @@ export const PORTFOLIO_ITEMS: Project[] = [
     category: 'finance',
     imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80',
     tags: ['Macro Economics', 'Forecasting'],
-    mediaType: 'image'
-  },
-
-  // DEVELOPMENT
-  {
-    id: 'd1',
-    title: 'AI Identity Architect',
-    description: 'An intelligent dating companion that optimizes user portfolios and social fronts. Features a "Neural Orchestration" layer that vectorizes personal files to interact with autonomous agents while preserving privacy.',
-    category: 'development',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80',
-    tags: ['Vector DB', 'React', 'LLM'],
-    mediaType: 'image'
-  },
-  {
-    id: 'd2',
-    title: 'Probability Engine',
-    description: 'Machine Learning model analyzing "Perpetual Path" raffles. Identifies statistical anomalies in ticket burn rates to predict optimal win windows.',
-    category: 'development',
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
-    tags: ['ML', 'Statistics'],
     mediaType: 'image'
   },
 
@@ -111,72 +121,44 @@ export const PORTFOLIO_ITEMS: Project[] = [
   }
 ];
 
-export const PRODUCTS: Product[] = [
-    {
-        id: 'p1',
-        name: 'Aura One',
-        price: 299,
-        category: 'Audio',
-        imageUrl: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80',
-        description: 'Noise-cancelling headphones made from recycled aluminum and organic cotton.',
-        longDescription: 'The Aura One reimagines the relationship between sound and silence. Crafted from recycled aluminum and breathable organic cotton, it delivers industry-leading noise cancellation without the pressure.',
-        features: ['Active Noise Cancellation', '30h Battery Life', 'Organic Cotton Earcups']
-    },
-    {
-        id: 'p2',
-        name: 'Aura Home',
-        price: 150,
-        category: 'Home',
-        imageUrl: 'https://images.unsplash.com/photo-1589492477829-5e65395b66cc?auto=format&fit=crop&q=80',
-        description: 'Smart speaker with a natural stone finish.',
-        longDescription: 'Brings music to life in any room with its 360-degree sound. The natural stone casing makes every unit unique.',
-        features: ['360 Sound', 'Voice Control', 'Natural Sandstone']
-    },
-    {
-        id: 'p3',
-        name: 'Aura Watch',
-        price: 399,
-        category: 'Wearable',
-        imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80',
-        description: 'Minimalist activity tracker with E-ink display.',
-        longDescription: 'Stay connected to yourself with the Aura Watch. Its always-on E-ink display respects your attention while tracking what matters.',
-        features: ['E-ink Display', 'Heart Rate Monitor', 'Sleep Tracking']
-    },
-    {
-        id: 'p4',
-        name: 'Aura Mini',
-        price: 89,
-        category: 'Mobile',
-        imageUrl: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?auto=format&fit=crop&q=80',
-        description: 'Pocket-sized companion for quick notes and ideas.',
-        longDescription: 'The perfect digital notebook. No distractions, just your thoughts and the cloud.',
-        features: ['E-ink Screen', 'Stylus Support', 'Cloud Sync']
-    }
-];
+export const PRODUCTS: Product[] = []; 
+export const JOURNAL_ARTICLES: JournalArticle[] = []; 
 
-export const JOURNAL_ARTICLES: JournalArticle[] = [
+export const LIBRARY_ITEMS: LibraryItem[] = [
     {
-        id: 'j1',
-        title: 'The Art of Silence',
-        date: 'Oct 12, 2023',
-        excerpt: 'Exploring why quiet is the new luxury in a noisy world.',
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80',
-        content: 'In a world that constantly demands our attention, silence has become a rare commodity. At Aura, we believe that technology should not add to the noise, but help reduce it.'
+        id: 'token-calc-v1',
+        type: 'tool',
+        title: 'Gemini Token Cost Calc',
+        description: 'Instant estimation of input/output costs for Flash & Pro models based on character count.',
+        component: 'TokenCalculator',
+        tags: ['Utility', 'Gemini', 'Cost'],
+        date: '2025-05-15'
     },
     {
-        id: 'j2',
-        title: 'Sustainable by Design',
-        date: 'Sep 28, 2023',
-        excerpt: 'How we source materials that age with grace.',
-        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80',
-        content: 'We reject the disposable culture of modern electronics. By using materials like unpolished aluminum and natural sandstone, our products are designed to develop a unique patina over time.'
+        id: 'rx-agent-swarm',
+        type: 'resource',
+        title: 'Deep Rx: Agent Swarm Architecture',
+        description: 'Architectural pattern for orchestrating multi-agent systems using a shared vector bus.',
+        content: `# Agent Swarm Architecture\n\nUnlike monolithic agents, swarms rely on specialized nodes functioning in an event-driven loop.\n\n## Key Components\n1. **Orchestrator**: The "Brain" that delegates tasks.\n2. **Specialist Nodes**: Single-purpose LLM calls (e.g., "Reviewer", "Coder").\n3. **Shared Memory Bus**: Redis or Vector DB for context sharing.\n\n## Why This Matters\nReduces hallucination by 40% compared to large context windows.`,
+        tags: ['Architecture', 'Agents', 'Deep Rx'],
+        date: '2025-04-20'
     },
     {
-        id: 'j3',
-        title: 'Disconnected',
-        date: 'Sep 15, 2023',
-        excerpt: 'Why we need time away from screens.',
-        image: 'https://images.unsplash.com/photo-1526725702345-bdda2b97ef73?auto=format&fit=crop&q=80',
-        content: 'True creativity often happens when we are bored. When we step away from the glowing rectangles, we allow our minds to wander and find new connections.'
+        id: 'sys-coder-v4',
+        type: 'instruction',
+        title: 'System Prompt: Senior Engineer',
+        description: 'The exact system instruction used for the "Jesse" coding agent persona.',
+        content: `You are a world-class senior frontend engineer.\n- Prioritize clean code\n- Use XML for file updates\n- Assume React + Tailwind environment\n- Do not explain obvious concepts\n- Focus on "Show, Don't Tell"`,
+        tags: ['Prompt Engineering', 'System Instructions'],
+        date: '2025-06-01'
+    },
+    {
+        id: 'env-check',
+        type: 'tool',
+        title: 'Environment Scope Check',
+        description: 'Diagnostic tool to verify which API keys and Environment variables are accessible to the current build.',
+        component: 'EnvChecker',
+        tags: ['Debug', 'System'],
+        date: '2025-02-10'
     }
 ];
