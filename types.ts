@@ -23,6 +23,7 @@ export interface Project {
 
 export interface LibraryItem {
     id: string;
+    slug: string; // URL friendly ID
     type: 'tool' | 'resource' | 'instruction';
     title: string;
     description: string;
@@ -43,7 +44,9 @@ export type ViewState =
   | { type: 'section', categoryId: CategoryId }
   | { type: 'all-projects' }
   | { type: 'vault' }
-  | { type: 'library' }
+  | { type: 'library' } // The Launcher Grid
+  | { type: 'lab-tool', itemId: string } // Standalone Tool View
+  | { type: 'lab-resource', itemId: string } // Standalone Resource View
   | { type: 'manifesto' };
 
 export interface CategoryDef {

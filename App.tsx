@@ -10,23 +10,59 @@ import SectionDetail from './components/SectionDetail';
 import Assistant, { AssistantRef } from './components/Assistant';
 import Vault from './components/Vault';
 import Library from './components/Library';
+import ToolWorkspace from './components/ToolWorkspace';
 import AllProjects from './components/AllProjects';
 import Manifesto from './components/Manifesto';
 import { ViewState, CategoryId } from './types';
+import { LIBRARY_ITEMS } from './constants';
 
 function App() {
   const [view, setView] = useState<ViewState>({ type: 'home' });
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const assistantRef = useRef<AssistantRef>(null);
 
+  // Hash Router Logic
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [view]);
+    const handleHashChange = () => {
+        const hash = window.location.hash;
+        
+        if (hash === '' || hash === '#') {
+            setView({ type: 'home' });
+        } 
+        else if (hash === '#library') {
+            setView({ type: 'library' });
+        }
+        else if (hash.startsWith('#/lab/')) {
+            // Tool Route
+            const slug = hash.replace('#/lab/', '');
+            const item = LIBRARY_ITEMS.find(i => i.slug === slug);
+            if (item) setView({ type: 'lab-tool', itemId: item.id });
+        }
+        else if (hash.startsWith('#/library/')) {
+            // Resource Route
+            const slug = hash.replace('#/library/', '');
+            const item = LIBRARY_ITEMS.find(i => i.slug === slug);
+            if (item) setView({ type: 'lab-resource', itemId: item.id });
+        }
+    };
+
+    // Initialize based on current hash
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleNavigate = (target: 'home' | CategoryId | 'all-projects') => {
-    if (target === 'home') setView({ type: 'home' });
+    if (target === 'home') {
+        window.location.hash = '';
+        setView({ type: 'home' });
+    }
     else if (target === 'vault') setIsVaultOpen(true);
-    else if (target === 'library') setView({ type: 'library' });
+    else if (target === 'library') {
+        window.location.hash = 'library';
+        setView({ type: 'library' });
+    }
     else if (target === 'all-projects') setView({ type: 'all-projects' });
     else setView({ type: 'section', categoryId: target });
   };
@@ -40,7 +76,8 @@ function App() {
   return (
     <div className="min-h-screen selection:bg-emerald-500/30 selection:text-white bg-[#050505] text-e5e5e5 font-sans">
       
-      {view.type !== 'manifesto' && (
+      {/* Navbar is visible unless in deep focus modes like Manifesto or Lab Workspace */}
+      {view.type !== 'manifesto' && view.type !== 'lab-tool' && view.type !== 'lab-resource' && (
           <Navbar 
             onNavigate={handleNavigate}
             onToggleVault={() => setIsVaultOpen(true)}
@@ -67,6 +104,10 @@ function App() {
 
         {view.type === 'library' && (
            <Library />
+        )}
+
+        {(view.type === 'lab-tool' || view.type === 'lab-resource') && (
+            <ToolWorkspace itemId={view.itemId} type={view.type === 'lab-tool' ? 'tool' : 'resource'} />
         )}
 
         {view.type === 'manifesto' && (

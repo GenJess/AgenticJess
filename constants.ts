@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import { Project, CategoryId, CategoryDef, Product, JournalArticle, LibraryItem } from './types';
+import { Project, CategoryDef, Product, JournalArticle, LibraryItem } from './types';
 
 export const BRAND_NAME = "JESSE";
 
@@ -127,6 +127,7 @@ export const JOURNAL_ARTICLES: JournalArticle[] = [];
 export const LIBRARY_ITEMS: LibraryItem[] = [
     {
         id: 'token-calc-v1',
+        slug: 'gemini-token-calc',
         type: 'tool',
         title: 'Gemini Token Cost Calc',
         description: 'Instant estimation of input/output costs for Flash & Pro models based on character count.',
@@ -136,24 +137,27 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     },
     {
         id: 'rx-agent-swarm',
+        slug: 'agent-swarm-rx',
         type: 'resource',
         title: 'Deep Rx: Agent Swarm Architecture',
         description: 'Architectural pattern for orchestrating multi-agent systems using a shared vector bus.',
-        content: `# Agent Swarm Architecture\n\nUnlike monolithic agents, swarms rely on specialized nodes functioning in an event-driven loop.\n\n## Key Components\n1. **Orchestrator**: The "Brain" that delegates tasks.\n2. **Specialist Nodes**: Single-purpose LLM calls (e.g., "Reviewer", "Coder").\n3. **Shared Memory Bus**: Redis or Vector DB for context sharing.\n\n## Why This Matters\nReduces hallucination by 40% compared to large context windows.`,
+        content: `# Agent Swarm Architecture\n\nUnlike monolithic agents, swarms rely on specialized nodes functioning in an event-driven loop.\n\n## Key Components\n1. **Orchestrator**: The "Brain" that delegates tasks.\n2. **Specialist Nodes**: Single-purpose LLM calls (e.g., "Reviewer", "Coder").\n3. **Shared Memory Bus**: Redis or Vector DB for context sharing.\n\n## Why This Matters\nReduces hallucination by 40% compared to large context windows.\n\n### Implementation Strategy\nUse a persistent 'scratchpad' in Redis that all agents can read from but only the Orchestrator can write to main memory.`,
         tags: ['Architecture', 'Agents', 'Deep Rx'],
         date: '2025-04-20'
     },
     {
         id: 'sys-coder-v4',
+        slug: 'system-prompt-v4',
         type: 'instruction',
         title: 'System Prompt: Senior Engineer',
         description: 'The exact system instruction used for the "Jesse" coding agent persona.',
-        content: `You are a world-class senior frontend engineer.\n- Prioritize clean code\n- Use XML for file updates\n- Assume React + Tailwind environment\n- Do not explain obvious concepts\n- Focus on "Show, Don't Tell"`,
+        content: `You are a world-class senior frontend engineer.\n- Prioritize clean code\n- Use XML for file updates\n- Assume React + Tailwind environment\n- Do not explain obvious concepts\n- Focus on "Show, Don't Tell"\n\n## Personality\nDirect, efficient, highly competent. Avoids fluff.`,
         tags: ['Prompt Engineering', 'System Instructions'],
         date: '2025-06-01'
     },
     {
         id: 'env-check',
+        slug: 'env-scope-check',
         type: 'tool',
         title: 'Environment Scope Check',
         description: 'Diagnostic tool to verify which API keys and Environment variables are accessible to the current build.',
