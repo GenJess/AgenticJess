@@ -25,22 +25,27 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
         const hash = window.location.hash;
+        // Normalize hash: remove leading # and ensures starts with /
+        // Support both #library and #/library for backward compatibility during transitions
+        const path = hash.startsWith('#') ? hash.slice(1) : hash;
         
-        if (hash === '' || hash === '#') {
+        if (path === '' || path === '/' || path === '/home') {
             setView({ type: 'home' });
         } 
-        else if (hash === '#library') {
+        else if (path === 'library' || path === '/library') {
             setView({ type: 'library' });
         }
-        else if (hash.startsWith('#/lab/')) {
+        else if (path.startsWith('/lab/') || path.startsWith('lab/')) {
             // Tool Route
-            const slug = hash.replace('#/lab/', '');
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            const slug = cleanPath.replace('/lab/', '');
             const item = LIBRARY_ITEMS.find(i => i.slug === slug);
             if (item) setView({ type: 'lab-tool', itemId: item.id });
         }
-        else if (hash.startsWith('#/library/')) {
-            // Resource Route
-            const slug = hash.replace('#/library/', '');
+        else if (path.startsWith('/library/') || path.startsWith('library/')) {
+            // Resource Route (Context)
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            const slug = cleanPath.replace('/library/', '');
             const item = LIBRARY_ITEMS.find(i => i.slug === slug);
             if (item) setView({ type: 'lab-resource', itemId: item.id });
         }
@@ -55,12 +60,12 @@ function App() {
 
   const handleNavigate = (target: 'home' | CategoryId | 'all-projects') => {
     if (target === 'home') {
-        window.location.hash = '';
+        window.location.hash = '/';
         setView({ type: 'home' });
     }
     else if (target === 'vault') setIsVaultOpen(true);
     else if (target === 'library') {
-        window.location.hash = 'library';
+        window.location.hash = '/library';
         setView({ type: 'library' });
     }
     else if (target === 'all-projects') setView({ type: 'all-projects' });
@@ -107,7 +112,11 @@ function App() {
         )}
 
         {(view.type === 'lab-tool' || view.type === 'lab-resource') && (
-            <ToolWorkspace itemId={view.itemId} type={view.type === 'lab-tool' ? 'tool' : 'resource'} />
+            <ToolWorkspace 
+                itemId={view.itemId} 
+                type={view.type === 'lab-tool' ? 'tool' : 'resource'} 
+                onClose={() => handleNavigate('library')}
+            />
         )}
 
         {view.type === 'manifesto' && (

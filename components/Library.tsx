@@ -10,7 +10,7 @@ const Library: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   
   const handleOpenItem = (slug: string, type: 'tool' | 'resource' | 'instruction') => {
-      // Logic handled by Hash Router in App.tsx
+      // Use consistent hash routing
       if (type === 'tool') {
           window.location.hash = `/lab/${slug}`;
       } else {
@@ -25,8 +25,12 @@ const Library: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#0F0F11] text-zinc-300 p-6 md:p-12 pt-32 animate-fade-in">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[#0F0F11] text-zinc-300 p-6 md:p-12 pt-32 animate-fade-in relative overflow-hidden">
+      
+      {/* Background Accent Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/5 blur-[120px] pointer-events-none rounded-full"></div>
+
+      <div className="max-w-5xl mx-auto relative z-10">
         
         {/* Header */}
         <header className="mb-12 border-b border-zinc-800/50 pb-6 flex flex-col md:flex-row justify-between md:items-end gap-6">
@@ -51,7 +55,7 @@ const Library: React.FC = () => {
                     placeholder="Search modules..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-[#161618] border border-zinc-800/60 rounded-lg text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/40 w-full md:w-64 transition-colors"
+                    className="pl-10 pr-4 py-2 bg-[#161618] border border-zinc-800/60 rounded-lg text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/40 w-full md:w-64 transition-colors placeholder-zinc-600"
                 />
           </div>
         </header>
@@ -62,8 +66,13 @@ const Library: React.FC = () => {
             <button 
               key={item.id} 
               onClick={() => handleOpenItem(item.slug, item.type)}
-              className="group relative flex flex-col p-6 rounded-xl border border-zinc-800/60 bg-[#161618] hover:bg-[#1A1A1C] hover:border-zinc-700 transition-all duration-300 text-left"
+              className="group relative flex flex-col p-6 rounded-xl border border-zinc-800/60 bg-[#161618] hover:bg-[#1A1A1C] hover:border-zinc-700 transition-all duration-300 text-left hover:shadow-2xl overflow-hidden"
             >
+              {/* Card Accent Glow on Hover */}
+              <div className={`absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity ${
+                  item.type === 'tool' ? 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]'
+              }`}></div>
+
               <div className={`mb-4 w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
                   item.type === 'tool' ? 'text-blue-400 bg-blue-500/5 group-hover:bg-blue-500/10' : 
                   'text-purple-400 bg-purple-500/5 group-hover:bg-purple-500/10'
@@ -81,7 +90,7 @@ const Library: React.FC = () => {
               </p>
               
               {/* Type Badge */}
-              <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
                 <span className="text-[10px] font-mono px-2 py-1 rounded bg-zinc-800 text-zinc-400 uppercase tracking-widest border border-zinc-700">
                   {item.type}
                 </span>
@@ -90,7 +99,7 @@ const Library: React.FC = () => {
           ))}
 
           {/* New Item Placeholder (For Devs/Agents) */}
-          <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-zinc-800 bg-transparent text-zinc-600">
+          <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-zinc-800 bg-transparent text-zinc-600 hover:border-zinc-700 hover:text-zinc-500 transition-colors cursor-default">
               <span className="material-symbols-outlined mb-2 opacity-50">add_circle</span>
               <span className="text-xs uppercase tracking-widest">Deploy New Tool</span>
               <span className="text-[10px] mt-1 opacity-50 font-mono">/src/components/tools/</span>
