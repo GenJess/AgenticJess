@@ -4,10 +4,10 @@
 */
 
 import React, { useState } from 'react';
-import { CategoryId } from '../types';
+import { CategoryId, NavigationTarget } from '../types';
 
 interface NavbarProps {
-  onNavigate: (target: 'home' | CategoryId) => void;
+  onNavigate: (target: NavigationTarget) => void;
   onToggleVault: () => void;
   activeCategory?: string;
 }
@@ -15,7 +15,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onNavigate, onToggleVault, activeCategory }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const handleNav = (target: 'home' | CategoryId) => {
+  const handleNav = (target: NavigationTarget) => {
     setIsMobileOpen(false);
     onNavigate(target);
   };
@@ -56,6 +56,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, onToggleVault, activeCatego
                     <button onClick={() => handleNav('library')} className="text-xs font-medium uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-2 border-l border-white/10 pl-6">
                         <span className="material-symbols-outlined text-[16px]">grid_view</span> Nexus
                     </button>
+
+                    <button onClick={() => handleNav('playbook')} className="text-xs font-medium uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2 border-l border-white/10 pl-6">
+                        <span className="material-symbols-outlined text-[16px]">terminal</span> SQL Playbook
+                    </button>
                 </div>
 
                 {/* Mobile Toggle */}
@@ -76,6 +80,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, onToggleVault, activeCatego
             <button onClick={() => handleNav('media')} className="text-3xl font-display font-light text-white">Media</button>
             <button onClick={() => { setIsMobileOpen(false); onToggleVault(); }} className="text-3xl font-display font-light text-emerald-500">Vault Access</button>
             <button onClick={() => handleNav('library')} className="text-xl font-mono text-zinc-500 mt-8">NEXUS // LIBRARY</button>
+            <button onClick={() => handleNav('playbook')} className="text-xl font-mono text-emerald-400">SQL PLAYBOOK</button>
         </div>
     </>
   );

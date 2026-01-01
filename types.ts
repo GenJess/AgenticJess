@@ -5,6 +5,8 @@
 
 export type CategoryId = 'finance' | 'development' | 'media' | 'vault' | 'library' | 'all-projects';
 
+export type NavigationTarget = 'home' | CategoryId | 'playbook';
+
 export interface Project {
   id: string;
   title: string;
@@ -39,7 +41,7 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export type ViewState = 
+export type ViewState =
   | { type: 'home' }
   | { type: 'section', categoryId: CategoryId }
   | { type: 'all-projects' }
@@ -47,6 +49,7 @@ export type ViewState =
   | { type: 'library' } // The Launcher Grid
   | { type: 'lab-tool', itemId: string } // Standalone Tool View
   | { type: 'lab-resource', itemId: string } // Standalone Resource View
+  | { type: 'playbook' }
   | { type: 'manifesto' };
 
 export interface CategoryDef {
