@@ -4,10 +4,10 @@
 */
 
 import React from 'react';
-import { CategoryId } from '../types';
+import { CategoryId, NavigationTarget } from '../types';
 
 interface HomeProps {
-  onNavigate: (target: CategoryId | 'all-projects') => void;
+  onNavigate: (target: NavigationTarget | 'all-projects') => void;
   onStartVoice: () => void;
 }
 
@@ -49,17 +49,23 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onStartVoice }) => {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4">
-                    <button 
+                    <button
                         onClick={() => onNavigate('all-projects')}
                         className="px-8 py-4 bg-white text-black rounded-lg font-semibold tracking-tight hover:bg-zinc-200 transition-all"
                     >
                         Enter Portfolio
                     </button>
-                    <button 
+                    <button
                         onClick={() => onNavigate('library')}
                         className="px-8 py-4 border border-white/10 text-white rounded-lg font-medium hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
                         <span className="material-symbols-outlined text-sm">grid_view</span> Access Nexus
+                    </button>
+                    <button
+                        onClick={() => onNavigate('playbook')}
+                        className="px-8 py-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 rounded-lg font-medium hover:bg-emerald-500/20 transition-colors flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-sm">terminal</span> SQL Playbook
                     </button>
                 </div>
             </div>

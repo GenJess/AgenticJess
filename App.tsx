@@ -13,7 +13,8 @@ import Library from './components/Library';
 import ToolWorkspace from './components/ToolWorkspace';
 import AllProjects from './components/AllProjects';
 import Manifesto from './components/Manifesto';
-import { ViewState, CategoryId } from './types';
+import SqlPlaybook from './components/SqlPlaybook';
+import { ViewState, CategoryId, NavigationTarget } from './types';
 import { LIBRARY_ITEMS } from './constants';
 
 function App() {
@@ -34,6 +35,9 @@ function App() {
         } 
         else if (path === 'library' || path === '/library') {
             setView({ type: 'library' });
+        }
+        else if (path === '/playbook' || path === 'playbook') {
+            setView({ type: 'playbook' });
         }
         else if (path.startsWith('/lab/') || path.startsWith('lab/')) {
             // Tool Route
@@ -58,10 +62,14 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (target: 'home' | CategoryId | 'all-projects') => {
+  const handleNavigate = (target: NavigationTarget | 'all-projects') => {
     if (target === 'home') {
         window.location.hash = '/';
         setView({ type: 'home' });
+    }
+    else if (target === 'playbook') {
+        window.location.hash = '/playbook';
+        setView({ type: 'playbook' });
     }
     else if (target === 'vault') setIsVaultOpen(true);
     else if (target === 'library') {
@@ -121,6 +129,10 @@ function App() {
 
         {view.type === 'manifesto' && (
             <Manifesto onClose={() => setView({ type: 'section', categoryId: 'development' })} />
+        )}
+
+        {view.type === 'playbook' && (
+            <SqlPlaybook onNavigate={handleNavigate} />
         )}
       </main>
 
