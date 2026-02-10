@@ -14,21 +14,28 @@ export interface Project {
   tags: string[];
   link?: string;
   mediaType?: 'image' | 'video' | 'audio';
-  videoUrl?: string; // URL to hosted video file
-  audioUrl?: string; // URL to hosted audio file
+  videoUrl?: string; 
+  audioUrl?: string;
   duration?: string;
   author?: string;
-  hasDetailView?: boolean; // If true, clicking opens a custom view instead of just expanding
+  hasDetailView?: boolean;
+  // Music specific
+  bpm?: number;
+  key?: string;
+  aiPlatform?: 'Suno' | 'Producer.ai' | 'MusicLM';
+  isGated?: boolean;
+  promptData?: string;
+  styleData?: string;
 }
 
 export interface LibraryItem {
     id: string;
-    slug: string; // URL friendly ID
+    slug: string; 
     type: 'tool' | 'resource' | 'instruction';
     title: string;
     description: string;
-    content?: string; // For text/markdown
-    component?: string; // identifier for dynamic rendering
+    content?: string; 
+    component?: string; 
     tags: string[];
     date: string;
 }
@@ -44,9 +51,9 @@ export type ViewState =
   | { type: 'section', categoryId: CategoryId }
   | { type: 'all-projects' }
   | { type: 'vault' }
-  | { type: 'library' } // The Launcher Grid
-  | { type: 'lab-tool', itemId: string } // Standalone Tool View
-  | { type: 'lab-resource', itemId: string } // Standalone Resource View
+  | { type: 'library' } 
+  | { type: 'lab-tool', itemId: string } 
+  | { type: 'lab-resource', itemId: string } 
   | { type: 'manifesto' };
 
 export interface CategoryDef {

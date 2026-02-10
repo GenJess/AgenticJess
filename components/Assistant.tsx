@@ -4,8 +4,7 @@
 */
 
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { ChatMessage, CategoryId } from '../types';
-import { sendMessageToGemini } from '../services/geminiService';
+import { CategoryId } from '../types';
 import { GoogleGenAI, LiveServerMessage, Modality, Type, FunctionDeclaration, Blob } from '@google/genai';
 import { PORTFOLIO_ITEMS } from '../constants';
 
@@ -17,8 +16,12 @@ interface AssistantProps {
     onNavigate: (category: CategoryId) => void;
 }
 
-// 3D Particle Orb Component
-const ParticleOrb: React.FC<{ active: boolean; audioLevel: number }> = ({ active, audioLevel }) => {
+// 3D Particle Orb Component - Refined for standalone interaction
+const ParticleOrb: React.FC<{ 
+    active: boolean; 
+    connecting: boolean;
+    audioLevel: number; 
+}> = ({ active, connecting, audioLevel }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -29,18 +32,17 @@ const ParticleOrb: React.FC<{ active: boolean; audioLevel: number }> = ({ active
 
         let animationFrameId: number;
         let particles: { x: number; y: number; z: number; size: number }[] = [];
-        const particleCount = 200;
-        const radius = 80;
+        const particleCount = 120;
+        const baseRadius = 50;
 
-        // Initialize particles on a sphere
         for (let i = 0; i < particleCount; i++) {
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos((Math.random() * 2) - 1);
             particles.push({
-                x: radius * Math.sin(phi) * Math.cos(theta),
-                y: radius * Math.sin(phi) * Math.sin(theta),
-                z: radius * Math.cos(phi),
-                size: Math.random() * 1.5 + 0.5
+                x: baseRadius * Math.sin(phi) * Math.cos(theta),
+                y: baseRadius * Math.sin(phi) * Math.sin(theta),
+                z: baseRadius * Math.cos(phi),
+                size: Math.random() * 1.8 + 0.4
             });
         }
 
@@ -48,36 +50,30 @@ const ParticleOrb: React.FC<{ active: boolean; audioLevel: number }> = ({ active
         let angleY = 0;
 
         const render = () => {
-            if (!active) return; // Pause rendering if not active mode
-
-            // Resize canvas to high DPI
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             ctx.scale(dpr, dpr);
-            
-            // Clear
             ctx.clearRect(0, 0, rect.width, rect.height);
             
-            // Rotation speed based on audio level
-            angleX += 0.005 + (audioLevel * 0.02);
-            angleY += 0.005 + (audioLevel * 0.02);
+            // Rotation speed logic
+            let rotationSpeed = 0.005;
+            if (connecting) rotationSpeed = 0.05;
+            if (active) rotationSpeed = 0.01 + (audioLevel * 0.05);
             
-            // Expansion pulse based on audio
-            const currentRadius = radius + (audioLevel * 40);
-
-            // Center
+            angleX += rotationSpeed;
+            angleY += rotationSpeed;
+            
+            const currentRadius = active ? (baseRadius + (audioLevel * 45)) : baseRadius;
             const cx = rect.width / 2;
             const cy = rect.height / 2;
 
             particles.forEach(p => {
-                // Rotate
                 let x = p.x;
                 let y = p.y;
                 let z = p.z;
 
-                // Rotation X
                 const cosX = Math.cos(angleX);
                 const sinX = Math.sin(angleX);
                 const tempY = y * cosX - z * sinX;
@@ -85,79 +81,45 @@ const ParticleOrb: React.FC<{ active: boolean; audioLevel: number }> = ({ active
                 y = tempY;
                 z = tempZ;
 
-                // Rotation Y
                 const cosY = Math.cos(angleY);
                 const sinY = Math.sin(angleY);
                 const tempX = x * cosY + z * sinY;
                 z = -x * sinY + z * cosY;
                 x = tempX;
 
-                // Project
-                // Simple perspective projection
-                const scale = 300 / (300 + z); 
-                const projX = cx + x * scale * (currentRadius/radius); // Apply pulse expansion
-                const projY = cy + y * scale * (currentRadius/radius);
+                const scale = 200 / (200 + z); 
+                const projX = cx + x * scale * (currentRadius/baseRadius);
+                const projY = cy + y * scale * (currentRadius/baseRadius);
                 
-                // Draw
-                const alpha = (z + radius) / (2 * radius); // Fade back particles
+                const alpha = (z + baseRadius) / (2 * baseRadius);
                 ctx.beginPath();
                 ctx.arc(projX, projY, p.size * scale, 0, Math.PI * 2);
                 
-                // Color dynamic
-                if (audioLevel > 0.1) {
-                    ctx.fillStyle = `rgba(52, 211, 153, ${alpha})`; // Emerald active
+                if (connecting) {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+                } else if (active) {
+                    ctx.fillStyle = `rgba(52, 211, 153, ${alpha})`; // Emerald 400
                 } else {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`; // White idle
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.15})`; // Idle
                 }
                 ctx.fill();
             });
-
-            // Connect nearby particles for "Neural" look
-            ctx.strokeStyle = `rgba(52, 211, 153, ${0.1 + audioLevel * 0.3})`;
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < particles.length; i++) {
-                // Only connect some to save perf
-                if (i % 2 !== 0) continue;
-                
-                // Re-calculate projected positions roughly for distance check (optimization: do this in main loop ideally)
-                // ... skipping rigorous projection here for brevity, using simple proximity check in 2D would be cheaper 
-                // but let's just draw lines between consecutive array items for visual flair
-                const p1 = particles[i];
-                const p2 = particles[(i + 1) % particles.length];
-                
-                // Reuse the rotation logic logic logic... actually let's just draw connections between projected points in the main loop if we stored them.
-                // Simplified: Just connect to center if audio is high
-                if (audioLevel > 0.4) {
-                    ctx.beginPath();
-                    ctx.moveTo(cx, cy);
-                    // ctx.lineTo(projX, projY) ... requires stored projection.
-                }
-            }
 
             animationFrameId = requestAnimationFrame(render);
         };
 
         render();
-
         return () => cancelAnimationFrame(animationFrameId);
-    }, [active, audioLevel]);
+    }, [active, connecting, audioLevel]);
 
     return <canvas ref={canvasRef} className="w-full h-full" />;
 };
 
 
 const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: "System Online. I can guide you through Jesse's Finance, Development, or Media work.", timestamp: Date.now() }
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'connecting' | 'active'>('idle');
   const [audioLevel, setAudioLevel] = useState(0);
   
-  const scrollRef = useRef<HTMLDivElement>(null);
   const inputAudioContextRef = useRef<AudioContext | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -167,80 +129,40 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
   const audioQueueRef = useRef<AudioBufferSourceNode[]>([]);
 
   useImperativeHandle(ref, () => ({
-    startVoiceSession: () => {
-        if (!isOpen) setIsOpen(true);
-        setTimeout(() => startLiveSession(), 500);
-    }
+    startVoiceSession: () => startLiveSession()
   }));
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, isOpen, isLiveMode]);
 
   useEffect(() => {
     return () => stopLiveSession();
   }, []);
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
-    const userMsg: ChatMessage = { role: 'user', text: inputValue, timestamp: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
-    setInputValue('');
-    setIsThinking(true);
-
-    try {
-      const history = messages.map(m => ({ role: m.role, text: m.text }));
-      const responseText = await sendMessageToGemini(history, userMsg.text);
-      setMessages(prev => [...prev, { role: 'model', text: responseText, timestamp: Date.now() }]);
-    } catch (error) {
-        console.error(error);
-        setMessages(prev => [...prev, { role: 'model', text: "System Error: Unable to process request.", timestamp: Date.now() }]);
-    } finally {
-      setIsThinking(false);
-    }
+  const toggleSession = () => {
+      if (status === 'idle') {
+          startLiveSession();
+      } else {
+          stopLiveSession();
+      }
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // --- Live API ---
 
   const startLiveSession = async () => {
-    if (isLiveConnected) return;
-    setIsLiveMode(true);
-    setMessages(prev => [...prev, { role: 'model', text: "Initializing voice connection...", timestamp: Date.now() }]);
+    if (status !== 'idle') return;
+    setStatus('connecting');
 
     try {
-      let apiKey = '';
-      try {
-        apiKey = process.env.API_KEY || '';
-      } catch (e) {
-        console.warn("Accessing process.env failed");
-      }
-      
-      if (!apiKey) {
-         setMessages(prev => [...prev, { role: 'model', text: "Error: API Key missing.", timestamp: Date.now() }]);
-         setIsLiveMode(false);
-         return;
-      }
+      const apiKey = process.env.API_KEY || '';
+      if (!apiKey) throw new Error("API Key Missing");
 
       const ai = new GoogleGenAI({ apiKey });
       
       const navigateTool: FunctionDeclaration = {
           name: "navigate",
-          description: "Navigate the user to a specific portfolio section.",
+          description: "Navigate the user interface to a specific category.",
           parameters: {
               type: Type.OBJECT,
               properties: {
                   category: { 
                       type: Type.STRING, 
-                      description: "The category to go to. Options: 'finance', 'development', 'media', 'all-projects'" 
+                      description: "The sector to go to: 'finance', 'development', 'media', 'all-projects', or 'library'" 
                   }
               },
               required: ["category"]
@@ -254,20 +176,10 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      const portfolioContext = PORTFOLIO_ITEMS.map(p => 
-        `- ${p.title} (${p.category}): ${p.description}`
-      ).join('\n');
-      
-      const systemInstruction = `You are Jesse's Systems Agent.
-      Your persona is efficient, precise, and slightly robotic/futuristic but helpful.
-      
-      Portfolio Content:
-      ${portfolioContext}
-      
-      Crucial Rule: If the user expresses interest in a category (Finance, Development, Media, or All Projects), 
-      IMMEDIATELY call the 'navigate' tool. Say "Accessing Finance Sector..." or "Loading All Modules...".
-      
-      Keep responses short.`;
+      const portfolioContext = PORTFOLIO_ITEMS.map(p => `- ${p.title} (${p.category}): ${p.description}`).join('\n');
+      const systemInstruction = `You are Jesse's Systems Agent. efficient and robotic but helpful. 
+      Context:\n${portfolioContext}\n
+      Use the navigate tool whenever the user mentions a category. Keep talking brief.`;
 
       const sessionPromise = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
@@ -278,9 +190,7 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
         },
         callbacks: {
           onopen: () => {
-            setIsLiveConnected(true);
-            setMessages(prev => [...prev, { role: 'model', text: "Connection active. Listening.", timestamp: Date.now() }]);
-            
+            setStatus('active');
             if (!inputAudioContextRef.current || !streamRef.current) return;
             sourceRef.current = inputAudioContextRef.current.createMediaStreamSource(streamRef.current);
             processorRef.current = inputAudioContextRef.current.createScriptProcessor(4096, 1, 1);
@@ -289,11 +199,9 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
                 const inputData = e.inputBuffer.getChannelData(0);
                 let sum = 0;
                 for(let i=0; i<inputData.length; i++) sum += inputData[i] * inputData[i];
-                // Smooth scaling for visualization
-                setAudioLevel(prev => (prev * 0.8) + (Math.sqrt(sum / inputData.length) * 5 * 0.2));
+                setAudioLevel(prev => (prev * 0.7) + (Math.sqrt(sum / inputData.length) * 4 * 0.3));
 
                 const pcmBlob = createBlob(inputData);
-                // Important: Use sessionPromise to ensure we have the session
                 sessionPromise.then(session => session.sendRealtimeInput({ media: pcmBlob }));
             };
             sourceRef.current.connect(processorRef.current);
@@ -306,10 +214,9 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
             if (msg.toolCall) {
                 for (const fc of msg.toolCall.functionCalls) {
                     if (fc.name === 'navigate') {
-                        const args = fc.args as any;
-                        onNavigate(args.category);
-                        sessionPromise.then(session => session.sendToolResponse({
-                            functionResponses: { name: fc.name, id: fc.id, response: { result: "Navigated" } }
+                        onNavigate((fc.args as any).category as CategoryId);
+                        sessionPromise.then(s => s.sendToolResponse({
+                            functionResponses: { name: fc.name, id: fc.id, response: { result: "navigated" } }
                         }));
                     }
                 }
@@ -320,19 +227,17 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
                 nextStartTimeRef.current = 0;
             }
           },
-          onclose: () => { setIsLiveConnected(false); setIsLiveMode(false); },
+          onclose: () => { stopLiveSession(); },
           onerror: (err) => { 
-            console.error("Live API Error:", err); 
-            setMessages(prev => [...prev, { role: 'model', text: "Voice connection error.", timestamp: Date.now() }]);
+            console.error(err);
             stopLiveSession(); 
           }
         }
       });
 
     } catch (e) {
-        console.error("Session Start Error:", e);
-        setMessages(prev => [...prev, { role: 'model', text: "Failed to initialize voice session.", timestamp: Date.now() }]);
-        setIsLiveMode(false);
+        console.error(e);
+        setStatus('idle');
     }
   };
 
@@ -342,8 +247,9 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
     processorRef.current?.disconnect();
     inputAudioContextRef.current?.close();
     audioContextRef.current?.close();
-    setIsLiveConnected(false);
-    setIsLiveMode(false);
+    audioQueueRef.current.forEach(s => s.stop());
+    audioQueueRef.current = [];
+    setStatus('idle');
     setAudioLevel(0);
   };
 
@@ -357,15 +263,11 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
     return { data: btoa(binary), mimeType: 'audio/pcm;rate=16000' };
   }
 
-  function decode(base64: string) {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-    return bytes;
-  }
-
   async function playAudioChunk(base64Audio: string, ctx: AudioContext) {
-      const dataInt16 = new Int16Array(decode(base64Audio).buffer);
+      const binaryString = atob(base64Audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+      const dataInt16 = new Int16Array(bytes.buffer);
       const float32 = new Float32Array(dataInt16.length);
       for(let i=0; i<dataInt16.length; i++) float32[i] = dataInt16[i] / 32768.0;
       
@@ -379,104 +281,53 @@ const Assistant = forwardRef<AssistantRef, AssistantProps>(({ onNavigate }, ref)
       source.start(nextStartTimeRef.current);
       nextStartTimeRef.current += buffer.duration;
       audioQueueRef.current.push(source);
-      source.onended = () => audioQueueRef.current = audioQueueRef.current.filter(s => s !== source);
   }
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 font-manrope flex flex-col items-end">
-      {isOpen && (
-        <div className="bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] w-[90vw] sm:w-[380px] h-[500px] mb-6 flex flex-col overflow-hidden border border-zinc-800 animate-slide-up relative">
-          
-          {/* Header */}
-          <div className="bg-zinc-900/50 p-4 border-b border-white/5 flex justify-between items-center z-10">
-            <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_currentColor] ${isLiveConnected ? 'bg-emerald-400 text-emerald-400 animate-pulse' : 'bg-zinc-600 text-zinc-600'}`}></div>
-                <span className="font-mono text-zinc-300 text-xs tracking-widest uppercase">Agent // v4.0</span>
-            </div>
-            
-            <button 
-                onClick={() => { stopLiveSession(); setIsOpen(false); }} 
-                className="text-zinc-500 hover:text-white transition-colors"
-            >
-                <span className="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
-
-          {/* Live Mode UI */}
-          {isLiveMode ? (
-             <div className="flex-1 flex flex-col items-center justify-center relative bg-[#050505]">
-                 <div className="relative z-10 w-full h-64 flex items-center justify-center">
-                    {/* 3D Particle Orb */}
-                    <div className="w-64 h-64">
-                        <ParticleOrb active={isLiveMode} audioLevel={audioLevel} />
-                    </div>
-                 </div>
-
-                 <div className="z-10 text-center px-8">
-                    <h3 className="font-display font-bold text-white text-lg mb-2 tracking-wide animate-pulse">LISTENING</h3>
-                    <p className="text-[10px] text-zinc-500 font-mono border border-white/5 bg-white/5 px-3 py-1 rounded-full inline-block">
-                        "Navigate to Finance"
-                    </p>
-                 </div>
-             </div>
-          ) : (
-            /* Text Mode UI */
-            <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#050505]" ref={scrollRef}>
-                    {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] p-3 rounded-lg text-sm leading-relaxed ${msg.role === 'user' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-300 border border-zinc-800'}`}>
-                        {msg.text}
-                        </div>
-                    </div>
-                    ))}
-                    {isThinking && <div className="text-xs font-mono text-emerald-500 ml-2 animate-pulse">COMPUTING...</div>}
-                </div>
-                <div className="p-3 border-t border-white/5 bg-zinc-900/30 backdrop-blur-sm">
-                    <div className="flex gap-2 items-center">
-                    <button 
-                        onClick={startLiveSession}
-                        className="p-2 rounded-lg bg-zinc-800 text-emerald-500 hover:bg-emerald-900/30 transition-colors border border-white/5"
-                    >
-                         <span className="material-symbols-outlined text-sm">mic</span>
-                    </button>
-                    <input 
-                        type="text" 
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        placeholder="Command..." 
-                        className="flex-1 bg-black border border-zinc-800 rounded-lg px-4 py-2.5 text-xs text-white outline-none focus:border-white/20 transition-colors placeholder-zinc-700 font-mono"
-                    />
-                    <button onClick={handleSend} disabled={!inputValue.trim() || isThinking} className="bg-white text-black p-2 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50">
-                        <span className="material-symbols-outlined text-sm">arrow_upward</span>
-                    </button>
-                    </div>
-                </div>
-            </>
-          )}
-        </div>
-      )}
+    <div className="fixed bottom-8 right-8 z-[100] group">
       
-      {/* Trigger Button */}
+      {/* Dynamic Status Label */}
+      <div className={`absolute bottom-full right-0 mb-4 font-mono text-[9px] tracking-[0.3em] uppercase transition-all duration-500 pointer-events-none ${
+        status === 'active' ? 'text-emerald-500 opacity-100 translate-y-0' : 'text-zinc-600 opacity-0 translate-y-2'
+      }`}>
+        <span className="animate-pulse">Active // Listening</span>
+      </div>
+
+      {/* The Unified Interactive Orb */}
       <button 
-        onClick={() => setIsOpen(!isOpen)} 
-        className="w-16 h-16 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-110 transition-transform duration-500 ease-out overflow-hidden relative group bg-black border border-white/10"
+        onClick={toggleSession}
+        className={`relative w-20 h-20 rounded-full transition-all duration-700 ease-out hover:scale-110 active:scale-95 flex items-center justify-center overflow-hidden border ${
+            status === 'active' 
+                ? 'bg-black border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.2)]' 
+                : 'bg-zinc-950/40 backdrop-blur-md border-white/5 hover:border-white/20'
+        }`}
       >
-         {isOpen ? (
-             /* Close Icon */
-             <div className="absolute inset-0 bg-white flex items-center justify-center z-20">
-                 <span className="material-symbols-outlined text-black text-2xl">close</span>
-             </div>
-         ) : (
-             /* 3D Orb Preview (Mini) */
-             <div className="w-full h-full flex items-center justify-center">
-                 <span className="material-symbols-outlined text-white text-2xl z-10">mic</span>
-                 {/* Subtle BG effect */}
-                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-purple-500/20"></div>
-             </div>
-         )}
+         {/* Internal Glow Effect */}
+         <div className={`absolute inset-0 transition-opacity duration-700 ${
+             status === 'active' ? 'opacity-10' : 'opacity-0'
+         } bg-emerald-500`}></div>
+
+         {/* 3D Reactive Particle Canvas */}
+         <div className="w-full h-full relative z-10">
+            <ParticleOrb 
+                active={status === 'active'} 
+                connecting={status === 'connecting'}
+                audioLevel={audioLevel} 
+            />
+         </div>
+
+         {/* Center Icon Overlay (Subtle) */}
+         <div className={`absolute inset-0 z-20 flex items-center justify-center transition-all duration-500 ${
+             status === 'idle' ? 'opacity-40 group-hover:opacity-100' : 'opacity-0 scale-50'
+         }`}>
+             <span className="material-symbols-outlined text-white text-xl">mic</span>
+         </div>
       </button>
+
+      {/* Decorative Outer Rings (Active Only) */}
+      {status === 'active' && (
+          <div className="absolute inset-[-10px] border border-emerald-500/10 rounded-full animate-[spin_10s_linear_infinite] pointer-events-none"></div>
+      )}
     </div>
   );
 });

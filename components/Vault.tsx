@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface VaultProps {
   isOpen: boolean;
@@ -15,7 +15,6 @@ const Vault: React.FC<VaultProps> = ({ isOpen, onClose }) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [error, setError] = useState(false);
 
-  // Example placeholder video - In production, this would be a URL from constants.ts
   const DEMO_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4"; 
 
   if (!isOpen) return null;
@@ -31,61 +30,106 @@ const Vault: React.FC<VaultProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fade-in">
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose}></div>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center animate-fade-in">
+        <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={onClose}></div>
         
-        <div className="relative bg-[#0a0a0a] w-full max-w-2xl p-0 rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden flex flex-col">
-            <button className="absolute top-4 right-4 text-zinc-600 hover:text-white z-20" onClick={onClose}>
-                <span className="material-symbols-outlined">close</span>
+        {/* Theater Mode UI */}
+        <div className={`relative w-full h-full flex flex-col transition-all duration-700 ${isUnlocked ? 'p-0' : 'p-4 items-center justify-center'}`}>
+            
+            <button className="absolute top-8 right-8 text-zinc-600 hover:text-white z-50 p-2 bg-black/50 rounded-full backdrop-blur-md transition-all" onClick={onClose}>
+                <span className="material-symbols-outlined text-3xl">close</span>
             </button>
             
             {!isUnlocked ? (
-                <div className="p-10 text-center">
+                <div className="bg-[#0a0a0a] w-full max-w-md p-10 rounded-2xl border border-zinc-800 shadow-2xl relative z-10">
                     <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-6 border border-zinc-800">
                         <span className="material-symbols-outlined text-zinc-500">fingerprint</span>
                     </div>
-                    <h3 className="text-xl font-display text-white mb-2">Restricted Access</h3>
-                    <p className="text-zinc-500 text-xs uppercase tracking-widest mb-6">Enter Passcode (Demo: 1234)</p>
+                    <h3 className="text-xl font-display text-white mb-2 text-center">Restricted Access</h3>
+                    <p className="text-zinc-500 text-[10px] uppercase tracking-widest mb-6 text-center">SECTOR 07 // VAULT</p>
                     
                     <input 
                         type="password" 
                         value={passcode}
                         onChange={(e) => setPasscode(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAuth()}
                         placeholder="••••" 
-                        className={`w-full bg-black border rounded-lg py-3 px-4 text-center text-white tracking-[1em] focus:outline-none focus:border-white/30 transition-colors font-mono mb-4 text-xl ${error ? 'border-red-500 text-red-500' : 'border-zinc-800'}`}
+                        className={`w-full bg-black border rounded-lg py-4 px-4 text-center text-white tracking-[1em] focus:outline-none focus:border-emerald-500/50 transition-all font-mono mb-6 text-2xl ${error ? 'border-red-500 text-red-500 animate-shake' : 'border-zinc-800'}`}
                     />
                     
                     <button 
                         onClick={handleAuth}
-                        className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-zinc-200 transition-colors"
+                        className="w-full bg-white text-black font-bold py-4 rounded-lg hover:bg-emerald-400 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
-                        AUTHENTICATE
+                        UNFOLD ARCHIVE
                     </button>
+                    <p className="text-[10px] text-zinc-700 mt-4 text-center font-mono">DEMO_KEY: 1234</p>
                 </div>
             ) : (
-                <div className="animate-slide-up bg-black relative">
-                    {/* Video Player */}
-                    <div className="aspect-video w-full bg-black relative group">
-                        <video 
-                            src={DEMO_VIDEO_URL} 
-                            autoPlay 
-                            controls 
-                            className="w-full h-full object-contain"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
-                        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded text-xs text-white uppercase tracking-widest font-mono border border-white/10">
-                            CONFIDENTIAL // PLAYING
-                        </div>
+                <div className="flex-1 flex flex-col relative animate-fade-in h-full overflow-hidden">
+                    {/* Theater Video Backdrop */}
+                    <div className="absolute inset-0 z-0">
+                        <img src="https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&q=80" className="w-full h-full object-cover opacity-10 blur-3xl scale-125" />
                     </div>
-                    
-                    <div className="p-6 border-t border-zinc-800 grid grid-cols-2 gap-4">
-                        <div className="col-span-2 text-center mb-2">
-                             <h3 className="text-lg font-display text-white">LoRA Model: Jesse_v4</h3>
-                             <p className="text-emerald-500 text-xs uppercase tracking-widest">Active • v4.2.1 • 12GB</p>
+
+                    {/* Main Cinema Area */}
+                    <div className="relative z-10 flex-1 flex flex-col lg:flex-row h-full">
+                        
+                        {/* Video Column */}
+                        <div className="flex-[3] bg-black flex items-center justify-center relative shadow-2xl">
+                             <video 
+                                src={DEMO_VIDEO_URL} 
+                                autoPlay 
+                                controls 
+                                className="w-full h-auto max-h-[85vh] object-contain shadow-[0_0_100px_rgba(0,0,0,1)]"
+                             />
+                             {/* Technical Overlay */}
+                             <div className="absolute top-10 left-10 flex flex-col gap-2 pointer-events-none">
+                                <span className="bg-emerald-500/10 text-emerald-400 text-[9px] font-mono px-2 py-1 rounded border border-emerald-500/20 uppercase tracking-[0.2em]">4K_ENCRYPTED_FEED</span>
+                                <span className="text-zinc-500 text-[10px] font-mono">STREAMPACK_NODE: #7712</span>
+                             </div>
                         </div>
-                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80" className="rounded-lg object-cover h-24 w-full opacity-50 hover:opacity-100 transition-opacity" />
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80" className="rounded-lg object-cover h-24 w-full opacity-50 hover:opacity-100 transition-opacity" />
+
+                        {/* Metadata Sidebar (Theater Mode) */}
+                        <div className="flex-1 bg-[#050505] border-l border-zinc-800/50 p-10 overflow-y-auto">
+                            <div className="space-y-12">
+                                <div>
+                                    <span className="text-emerald-500 text-[10px] font-mono uppercase tracking-[0.3em] block mb-2">Active Artifact</span>
+                                    <h2 className="text-3xl font-display font-bold text-white mb-4">LoRA_Artifact_v4</h2>
+                                    <p className="text-zinc-500 text-sm leading-relaxed">
+                                        A visual intelligence model trained on 12,000 surreal architectural renders. This artifact represents the "Jesse" design aesthetic at its most extreme.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <h4 className="text-white text-xs font-mono uppercase tracking-widest border-b border-zinc-800 pb-2">Technical Specs</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 bg-zinc-900/50 rounded-lg border border-white/5">
+                                            <span className="text-[9px] text-zinc-500 uppercase block">Model Size</span>
+                                            <span className="text-white font-mono">12.2 GB</span>
+                                        </div>
+                                        <div className="p-4 bg-zinc-900/50 rounded-lg border border-white/5">
+                                            <span className="text-[9px] text-zinc-500 uppercase block">Epochs</span>
+                                            <span className="text-white font-mono">4,500</span>
+                                        </div>
+                                        <div className="p-4 bg-zinc-900/50 rounded-lg border border-white/5">
+                                            <span className="text-[9px] text-zinc-500 uppercase block">Base Model</span>
+                                            <span className="text-white font-mono">SDXL_v1</span>
+                                        </div>
+                                        <div className="p-4 bg-zinc-900/50 rounded-lg border border-white/5">
+                                            <span className="text-[9px] text-zinc-500 uppercase block">Inference</span>
+                                            <span className="text-white font-mono">1.2s / it</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-8">
+                                    <button className="w-full py-4 border border-zinc-800 rounded-lg text-xs uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                                        Download Weight Pack (.safetensors)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
